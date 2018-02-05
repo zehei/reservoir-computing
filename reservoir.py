@@ -1,7 +1,7 @@
 import numpy as np
 
 def show_progress(s, i, loops):
-    if(i%int(loops/100)==0): print(s, "progress:", int(i/(loops/100)),"%")
+    if(i%int(loops/1)==0): print(s, "progress:", int(i/(loops/1)),"%")
 
 def activation_function(x):
     def sigmoid(element):
@@ -44,7 +44,7 @@ class new_network:
         x += x_delta/tau
         return x, value_res, value_out
     
-    def train(self, inp, target):
+    def train(self, inp, target, training_speed = 0.1, train_delta = 2, show_progress_or_not = False):
         w_inp = self.weight["input"]
         w_out = self.weight["readout"]
         w_rec = self.weight["recurrent"]
@@ -56,9 +56,11 @@ class new_network:
         P = (1.0/alpha)*np.eye(self.dim_reservoir)
         #time constant
         tau = 10
-        train_delta = 2
         for t in range(input_duration):
-            show_progress("training", t, input_duration)
+            if(show_progress_or_not == True): 
+                show_progress("training", t, input_duration)
+            else:
+                pass
             x, value_res, value_out = self.run(inp[t], reservoir_state)
             reservoir_state = x        
             if(t%train_delta == 0):
@@ -68,7 +70,7 @@ class new_network:
                 P = P - k.dot(k.T)*c
                 error = value_out - np.expand_dims(target[t], 1)
                 w_out_delta = -error*c*k.T
-                w_out += w_out_delta
+                w_out += w_out_delta*training_speed
         self.weight["readout"] = w_out
         return None
     
@@ -76,13 +78,16 @@ class new_network:
         self.weight["readout"] = np.zeros([self.dim_output, self.dim_reservoir])
         return None
     
-    def test(self, inp, give_me_reservoir_state = False):
+    def test(self, inp, give_me_reservoir_state = False, show_progress_or_not = False):
         duration = inp.shape[0]
         reservoir_state = np.zeros([self.dim_reservoir, 1])
         output = np.empty([duration, self.dim_output])
         reservoir_state_record = np.empty([duration, self.dim_reservoir])
         for t in range(duration):
-            show_progress("testing", t, duration)
+            if(show_progress_or_not == True): 
+                show_progress("testing", t, duration)
+            else:
+                pass
             reservoir_state, value_res, value_out = self.run(inp[t], reservoir_state)
             output[t] = value_out[:, 0]
             reservoir_state_record[t] = reservoir_state[:, 0]
