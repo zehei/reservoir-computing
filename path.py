@@ -1,0 +1,5 @@
+data = "result_data"
+image = "result_image"
+network = "storage_network"
+inp = "storage_input"
+spatial_network = "storage_network/spatial_network"
